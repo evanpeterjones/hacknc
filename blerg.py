@@ -1,13 +1,30 @@
 import requests
 import json
+from oauth2client.service_account import ServiceAccountCredentials
 from oauth2client.client import flow_from_clientsecrets
+from oauth2client.file import Storage
+import webbrowser
+import os
+import re
+
+def getCredentials():
+    scope = ['https://www.googleapis.com/auth/blogger']
+    flow = flow_from_clientsecrets(
+        'secrets.json', scope,
+        redirect_uri='urn:ietf:wg:oauth:2.0:oob')
+    storage = Storage('credentials.dat')
+    credentials = storage.get()
+    if not credentials or credentials.invalid:
+        auth_uri = flow.step1_get_authorize_url()
+        webbrowser.open(auth_uri)
+        auth_code = raw_input('Enter the auth code: ')
+        credentials = flow.step2_exchange(auth_code)
+        storage.put(credentials)
+    return credentials
+
+credentials = getCredentials()
 blogID='859763561203371182'
 APIKEY='AIzaSyDSGVjPMLb0QXm76AMWr8S-f3I6B2keqBc'
-
-flow = flow_from_clientsecrets('secrets.json',
-                               scope='https://www.googleapis.com/auth/blogger',
-                               redirect_uri='http://evanpeterjones.com')
-#print(dir(flow))
 if blogID==None:
     blogID=raw_input('enter a blogID: ')
 if APIKEY==None:
@@ -48,7 +65,10 @@ class blerg:
             return None
 
     def printContent(self, selection):
-        print(self.content[selection])
+        os.system('clear')
+        print(self.blogTitles[selection]+"\n")
+#        print(self.content[selection].replace("<br />","\n").replace(r"<[a-zA-Z0-9/]*>",""))
+        print(re.sub(r'<[a-zA-Z-0-9/]*>',' ',self.content[selection].replace("<br />","\n")))
 
     def printPosts(self):
         for i in range(0, len(self.blogTitles)):
@@ -62,7 +82,6 @@ class blerg:
         except:
             print("Error")
 
-    #pass me a file i'll make it json and post it
     def POST(self, Title="post", Content="this is a test"):
         self.JSON['title']   = Title
         self.JSON['content'] = Content
@@ -77,4 +96,4 @@ class blerg:
             print("error on POST")
 
 st=requests.get(GET)
-blerg(st)
+t = blerg(st)
