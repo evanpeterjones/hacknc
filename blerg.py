@@ -17,7 +17,7 @@ def getCredentials():
     if not credentials or credentials.invalid:
         auth_uri = flow.step1_get_authorize_url()
         webbrowser.open(auth_uri)
-        auth_code = raw_input('Enter the auth code: ')
+        auth_code = input('Enter the auth code: ')
         credentials = flow.step2_exchange(auth_code)
         storage.put(credentials)
     return credentials
@@ -47,14 +47,12 @@ class blerg:
         self.blogTitles = self.GET(a, 'title')
         self.getLinks   = self.GET(a, 'id')
         self.content    = self.GET(a, 'content')
-        print("Select a Post")
-        for i in range(0, len(self.blogTitles)):
-            print(str(i)+" : "+self.blogTitles[i])
-        val=input(" ")
-        self.printContent(int(val))
-        self.savePost(int(val))
-#        self.POST()
+        self.validPosts = self.getLocalPosts()
+        self.display()        
 
+    def getLocalPosts(self):
+        return [] # [f for f in listdir(walk) if os.path.splitext(f) is ".txt"]
+        
     def GET(self,st,value):
         if st.status_code is 200:
             val = [None] * len(st.json().get('items'))
@@ -63,6 +61,19 @@ class blerg:
             return val
         else:
             return None
+
+    def display(self):
+        print("Download a Post")
+        numPosts = len(self.blogTitles)
+        for i in range(0, numPosts):
+            print(str(i)+" : "+self.blogTitles[i])
+        print("Or Upload an Edit")
+        for i in range(numPosts, len(self.validPosts)+numPosts):
+            print(str(i)+" : "+self.validPosts[i-numPosts])
+        value = input("Select a post")
+        self.printContent(int(value))
+        self.savePost(int(value))
+        self.POST()
 
     def printContent(self, selection):
         os.system('clear')
