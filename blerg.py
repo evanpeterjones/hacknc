@@ -4,6 +4,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
 import webbrowser
+import sys
 import os
 import re
 
@@ -37,7 +38,7 @@ headers = {
 }
 
 class blerg:
-    def __init__(self,a):
+    def __init__(self, a, args):
         self.JSON = {
             "kind": "blogger#post",
             "blog": { "id": blogID },
@@ -47,11 +48,12 @@ class blerg:
         self.blogTitles = self.GET(a, 'title')
         self.getLinks   = self.GET(a, 'id')
         self.content    = self.GET(a, 'content')
-        self.validPosts = self.getLocalPosts()
+        self.validPosts = args if args is not null else self.getLocalPosts() 
         self.display()        
 
     def getLocalPosts(self):
-        return [] # [f for f in listdir(walk) if os.path.splitext(f) is ".txt"]
+        print (os.listdir("."))
+        return [f for f in os.listdir('.') if os.path.splitext(f) is ".txt"]
         
     def GET(self,st,value):
         if st.status_code is 200:
@@ -68,9 +70,10 @@ class blerg:
         for i in range(0, numPosts):
             print(str(i)+" : "+self.blogTitles[i])
         print("Or Upload an Edit")
+        print(len(self.validPosts))
         for i in range(numPosts, len(self.validPosts)+numPosts):
             print(str(i)+" : "+self.validPosts[i-numPosts])
-        value = input("Select a post")
+        value = input("Select a post: ")
         self.printContent(int(value))
         self.savePost(int(value))
         self.POST()
@@ -107,4 +110,4 @@ class blerg:
             print("error on POST")
 
 st=requests.get(GET)
-t = blerg(st)
+t = blerg(st, sys.argv)
