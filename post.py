@@ -37,7 +37,7 @@ headers = {
     'Content-Type' : 'application/json'
 }
 
-class blerg:
+class post:
     def __init__(self, a, args):
         self.JSON = {
             "kind": "blogger#post",
@@ -48,12 +48,12 @@ class blerg:
         self.blogTitles = self.GET(a, 'title')
         self.getLinks   = self.GET(a, 'id')
         self.content    = self.GET(a, 'content')
-        self.validPosts = args if args is not null else self.getLocalPosts() 
-        self.display()        
+        self.isPost     = len(args) > 1
+        self.validPosts = args if self.isPost else self._getLocalPosts_() 
+        self.display()
 
-    def getLocalPosts(self):
-        print (os.listdir("."))
-        return [f for f in os.listdir('.') if os.path.splitext(f) is ".txt"]
+    def _getLocalPosts_(self):
+        return [f for f in os.listdir() if "txt" in f]
         
     def GET(self,st,value):
         if st.status_code is 200:
@@ -69,14 +69,15 @@ class blerg:
         numPosts = len(self.blogTitles)
         for i in range(0, numPosts):
             print(str(i)+" : "+self.blogTitles[i])
-        print("Or Upload an Edit")
-        print(len(self.validPosts))
+        print("\nOr Upload an Edit")
         for i in range(numPosts, len(self.validPosts)+numPosts):
             print(str(i)+" : "+self.validPosts[i-numPosts])
-        value = input("Select a post: ")
+        value = input("\nSelect a post: ")
         self.printContent(int(value))
-        self.savePost(int(value))
-        self.POST()
+        if (self.isPost):            
+            self.POST()
+        else:
+            self.savePost(int(value))
 
     def printContent(self, selection):
         os.system('clear')
@@ -110,4 +111,4 @@ class blerg:
             print("error on POST")
 
 st=requests.get(GET)
-t = blerg(st, sys.argv)
+t = post(st, sys.argv)
